@@ -1,0 +1,38 @@
+{
+  "meteor": {},
+  "dependencies": {
+    "basePackages": {
+      "iron-router": {},
+      "Planet": {},
+      "bootstrap-3": {},
+      "masonrify": {}
+    },
+    "packages": {
+      "iron-router": {
+        "git": "https://github.com/EventedMind/iron-router.git",
+        "tag": "v0.7.1",
+        "commit": "d1ffb3f06ea4c112132b030f2eb1a70b81675ecb"
+      },
+      "Planet": {
+        "git": "https://github.com/yasaricli/planet.git",
+        "tag": "v0.2.2",
+        "commit": "bcfc96a665c7ff785dcfa639aded110b7b7cc656"
+      },
+      "bootstrap-3": {
+        "git": "https://github.com/mangasocial/meteor-bootstrap-3.git",
+        "tag": "v3.1.1-1",
+        "commit": "63dd38968828bb8963636df93e9a1c45e2dfe67e"
+      },
+      "masonrify": {
+        "git": "https://github.com/voodoohop/meteor-masonrify.git",
+        "tag": "v0.0.3",
+        "commit": "e7a5e71a4193bd68a7bae4c250931147659b5dcb"
+      },
+      "blaze-layout": {
+        "git": "https://github.com/EventedMind/blaze-layout.git",
+        "tag": "v0.2.4",
+        "commit": "b40e9b0612329288d75cf52ad14a7da64bb8618f"
+      }
+    }
+  }
+}
