@@ -1,0 +1,10 @@
+Eclipse Europe Travel App
+
+Requires:
+Meteor 0.8
+
+Packages:
+iron-router
+Planet
+bootstrap-3
+masonrify
