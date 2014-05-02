@@ -8,19 +8,20 @@
 
 <template name="appLayout">
 	{{> Modal}}
+	{{> Instructions}}
 
 	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 	  <div class="container">
-	  	<a class="navbar-brand">Eclipse Europe Travel</a>
+	  	<a class="navbar-brand" href="/">Eclipse Europe Travel</a>
 	  	{{#if currentUser}}
 	  	<p class="navbar-text">{{> loginButtons}}</p>
 	  	{{/if}}
 
 	  	<ul class="nav navbar-nav navbar-right">
-	  		<li><a href="#" id="bookedTrips" class="navbar-link">Admin</a></li>
-	  		<li><button type="button" id="clearTrip" class="btn btn-default navbar-btn">Clear Trip</button></li>	  		
-	    	<li><p class="navbar-text">Total: £{{tripTotal}}</p></li>
-	    	<li><button type="button" id="bookItin" class="btn btn-primary navbar-btn">Book it!</button></li>
+	        <li><a href="/">Home</a></li>
+	        <li><a href="/whatwedo">What We Do</a></li>
+	        <li class="active"><a href="/activities">London Activities</a></li>
+	        <li><a href="/contact">Contact Us</a></li>
 	    </ul>
 
 	  </div>
@@ -56,33 +57,61 @@
 			</div>
 
 			<div class="col-sm-4">
+				{{#if currentUser}}
+					{{> itinPlanner}}
+				{{/if}}
+			</div>
+		</div>
+	</div>		
+</template>
 
-				<div class="row">
-					<div class="col-sm-12">
-						  <h2 class="text-center"><small class="previous"><a href="#">&larr;</a></small>Day {{currentDay}}<small class="next"><a href="#">&rarr;</a></small></h2>					
-					</div>
-				</div>
-				
+<template name="itinPlanner">					
+				<div class="panel panel-{{loggedIn}}">
+				  <!-- Default panel contents -->
+				  <div class="panel-heading">				  	
+					  	<ul class="list-inline">
+					  		<li><button type="button" id="clearTrip" class="btn btn-default">Clear Trip</button></li>  		
+					    	<li><p>Total: £{{tripTotal}}</p></li>
+					    	<li class="pull-right"><button type="button" id="bookItin" class="btn btn-primary">Next</button></li>
+					    </ul>					
+				  </div>
+				  <div class="panel-body">
+				    <h2 class="text-center"><small class="previous"><a href="#">&larr;</a></small>Day {{currentDay}}<small class="next"><a href="#">&rarr;</a></small></h2>
+				  </div>
 
-				<div class="row">
-					<div class="col-sm-12">
-						{{#if currentUser}}
+				  	
 							{{#unless itinItems}}
 								<h5>Please add items to your trip...</h5>
 							{{else}}
-							{{#each itinItems}}
-								{{> itinItem}}
-							{{/each}}
+								{{#each itinItems}}
+									<ul class="list-group">
+				    					<li class="list-group-item">{{> itinItem}}</li>
+				    				</ul>						
+								{{/each}}
 							{{/unless}}
-						{{else}}
-							<h5>Please {{> loginButtons}} to plan trip</h5>
-						{{/if}}
-					</div>
-				</div>
+				</div>			
+</template>
 
-			</div>
-			</div>
-		</div>		
+<template name="Instructions">
+<div class="modal fade" id="instructionModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+    	 <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Hello!</h4>
+      </div>
+      <div class="modal-body">
+        <p> To create your customised trip, please {{> loginButtons}}<br>
+        	It only takes 10 seconds!<br>
+        	No confirmation e-mail required and no spam guaranteed!       	
+		</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Got it!</button>
+      </div>      
+    </div>
+  </div>
+</div>
 </template>
 
 <template name="cat1">
@@ -97,33 +126,24 @@
 						    <button class="btn btn-default" data-toggle="modal" data-target="#myModal">More Info</button>
 						  </div>
 						  <div class="btn-group">
-						    <button type="button" class="btn btn-primary tripAdd">£{{price}} Add</button>
+						    <button type="button" class="btn btn-primary tripAdd">£{{price}} Book</button>
 						  </div>
 				</div>
 		</div>
 </template>
 
-<template name="itinItem">
-	<div class="panel panel-default">
-		<div class="panel-body">
-			 <h3>{{title}}</h3>
-		</div>
-		 <div class="panel-footer">
-			<ul class="list-inline">
-				<li><a href="#" class="btn btn-default removeItin" role="button">Remove</a></li>
-				<li><p>£{{price}}</p></li>
-			</ul>
-		</div>
-	</div>
+<template name="itinItem">		 
+	<h3>{{title}}<small> £{{price}}</small><small class="pull-right"><button type="button" class="close removeItin" aria-hidden="true">&times;</button></small></h3>	
 </template>
 
 <template name="Modal">
-{{#with selActivity}}
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    	{{#with selActivity}}
+      <div class="modal-header">      	
+        <button type="button" class="close">&times;</button>
         <h4 class="modal-title" id="myModalLabel">{{title}}</h4>
       </div>
       <div class="modal-body">
@@ -137,48 +157,48 @@
       <div class="modal-footer">
         <ul class="list-inline">
         	<li><p>£{{price}}</p></li>        	
-			<li><a class="btn btn-primary tripAdd">Add to Trip</a></li>			
+			<li><a class="btn btn-primary tripAdd">Book</a></li>			
 		</ul>
       </div>
+      {{/with}}
     </div>
   </div>
 </div>
-{{/with}}
+
 </template>
 
 <template name="modalCarousel">
-	<div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+	<div id="myCarousel" class="carousel" data-interval="false">
 		  <!-- Indicators -->
 		  <ol class="carousel-indicators">
-		    <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
-		    <li data-target="#carousel-example-generic" data-slide-to="1"></li>
-		    <li data-target="#carousel-example-generic" data-slide-to="2"></li>
+		    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+		    <li data-target="#myCarousel" data-slide-to="1"></li>
+		    <li data-target="#myCarousel" data-slide-to="2"></li>
 		  </ol>
 
 		  <!-- Wrapper for slides -->
 		  <div class="carousel-inner">
-		    <div class="item active">
-		      <img src="http://placehold.it/250x250" class="img-responsive">
-		    </div>
-
-		    <div class="item">
-		      <img src="http://placehold.it/250x250" class="img-responsive">
-		    </div>
-
-		    <div class="item">
-		      <img src="http://placehold.it/250x250" class="img-responsive">
-		    </div>
-
+		  	 	{{#with CarouselImages}}
+				    <div class="item active">
+				      <img src="{{images}}" class="img-responsive">
+				    </div>
+				    
+				  	{{#each otherImgs}}		  	 
+					    <div class="item">
+					      <img src="{{this}}" class="img-responsive">
+					    </div>
+				    {{/each}}
+				{{/with}}	    
 		  </div>
 
 		  <!-- Controls -->
-		  <a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
-		    <span class="glyphicon glyphicon-chevron-left"></span>
+		  <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+		    <span class="glyphicon glyphicon-chevron-left" ></span>
 		  </a>
-		  <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
-		    <span class="glyphicon glyphicon-chevron-right"></span>
+		  <a class="right carousel-control" href="#myCarousel" data-slide="next">
+		    <span class="glyphicon glyphicon-chevron-right" ></span>
 		  </a>
-		</div>
+	</div>
 </template>
 
 <template name="admin">
@@ -187,7 +207,7 @@
 	  	<a class="navbar-brand">Eclipse Europe Travel</a>
 	  	<p class="navbar-text">Booked Trips</p>
 	  	<p class="navbar-text">{{> loginButtons}}</p>
-	  	<p class="navbar-text"> <a href="/activities" class="navbar-link">Edit Activities</a></p>
+	  	<p class="navbar-text"> <a href="/editActivities" class="navbar-link">Edit Activities</a></p>
 	  	<p class="navbar-text"><a href="#" id="booking" class="navbar-link">Booking Page</a></p>
 	  </div>
 	</nav>
@@ -361,6 +381,14 @@
 	      <input type="text" class="form-control" id="inputImageURL" placeholder="URL of main image for activity (if local user /public/images/XX_0)" value="{{images}}">
 	    </div>
 	  </div>
+
+	  <div class="form-group">
+	    <label for="inputOtherImages" class="col-sm-2 control-label">Other Images URL</label>
+	    <div class="col-sm-10">
+	      <textarea class="form-control" rows="4" id="inputOtherImages" placeholder="Add URLs of other images (SEPERATED BY COMMA)">{{otherImgs}}</textarea>
+	    </div>
+	  </div>
+
 	</form>
 
 
@@ -378,19 +406,174 @@
 				<div class="jumbotron">
 					<div class="container">
 					    <h1>Thank You!</h1>
-						<p>Your trip has been successfully booked and one of our advisors will soon contact you with the details</p>
-						<p><a href="/" class="btn btn-primary btn-lg" role="button">Return to Booking</a></p>
+						<p>We have received your request and one of our travel experts will e-mail you with more details very soon.<br><br>
+						In the meantime, feel free to explore more of what London has to offer!</p>
+						<p><a href="/activities" class="btn btn-primary btn-lg" role="button">Return to Activities</a></p>
 					</div>
 				</div>
 			</div>
 		</div>
 </template>
 
+<template name="homepage">
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	  <div class="container">
+	  	<a class="navbar-brand">Eclipse Europe Travel</a>
+	  	<ul class="nav navbar-nav navbar-right">
+	        <li class="active"><a href="/">Home</a></li>
+	        <li><a href="/whatwedo">What We Do</a></li>
+	        <li><a href="/activities">London Activities</a></li>
+	        <li><a href="/contact">Contact Us</a></li>
+	    </ul>
+	  </div>
+	</nav>
 
+	
+		<div class="jumbotron mainImage" style="padding-top: 70px;">
+			<div class="container ">
+				<div class="mainContent">			
+				  <h1>Explore.</h1>
+				  <h1>Dream.</h1>
+				  <h1>Discover.</h1>
+				
+				  <p>When was the last time you did something truly amazing?<br>
+				  	Catering exclusively for Chinese customers we offer exciting trips for adventurous people.<br>
+				  	We provide a range of authentic experiences that will ensure you have a memorable trip.</p>
+				  <p><a href="/activities" class="btn btn-primary btn-lg" role="button">See Experiences</a></p>
+			</div>
+		</div>
+	</div>
 
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-4 ACImage">
+				<div class="mainContent">			
+				  <h1>Art & Culture</h1>
+				  			
+				  <p>Be inspired by London's history and discover it's creative scene.</p>
+				  <p><a href="/activities" class="btn btn-primary btn-sm" role="button">See Experiences</a></p>
+				</div>
+			</div>
+			<div class="col-sm-4 AAImage">
+				<div class="mainContent">			
+				  <h1>Action & Adventure</h1>
+				  			
+				  <p>Adrenaline-fuelled experiences for those who love to be active.</p>
+				  <p><a href="/activities" class="btn btn-primary btn-sm" role="button">See Experiences</a></p>
+				</div>
+			</div>
+			<div class="col-sm-4 FDImage">
+				<div class="mainContent">			
+				  <h1>Food & Drink</h1>
+				  			
+				  <p>Savour the tastes of the best London has to offer.</p>
+				  <p><a href="/activities" class="btn btn-primary btn-sm" role="button">See Experiences</a></p>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+				<h1 class="text-center">Exciting trips for adventurous people</h1>
+				<h3 class="text-center">Eclipse Europe Travel</h3>
+				<hr>
+				<p class="text-center">We create truly unforgettable trips for our customers.</p>
+					<hr>
+					<p class="text-center">
+					When visiting a new city it's easy to miss out on the best the city has to offer. We spare no expense in finding authentic experiences that will thrill, delight and surprise you.</p>
+					<hr>
+					<p class="text-center">
+					Whether you are a student studying in the UK or a young professional, we understand that you want high quality experiences on your trips rather than doing what every other tourist does.</p>
+					<hr>
+					<p class="text-center">
+					We offer a bespoke service that allows you to choose exactly what you want to see, do and experience. Receive as much advice as you want from our travel experts who can also provide excellent restaurant, bar and nightlife recommendations just for you.</p>
+				
+				<h1 class="text-center"><a href="/activities" class="btn btn-primary">Show me these experiences!</a></h1>
+			</div>
+		</div>
+	</div>
+</template>
 
+<template name="whatWeDo">
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	  <div class="container">
+	  	<a class="navbar-brand">Eclipse Europe Travel</a>
+	  	<ul class="nav navbar-nav navbar-right">
+	        <li><a href="/">Home</a></li>
+	        <li class="active"><a href="/whatwedo">What We Do</a></li>
+	        <li><a href="/activities">London Activities</a></li>
+	        <li><a href="/contact">Contact Us</a></li>
+	    </ul>
+	  </div>
+	</nav>
 
+	<div class="container" style="padding-top: 70px;">
+		<div class="row">
+			<div class="col-sm-6">
+				<h1>The Best Experiences</h1>
+				<hr>
+				<p>We create truly unforgettable trips for our customers.<br><br>
+					When visiting a new city it's easy to miss out on the best the city has to offer. We spare no expense in finding authentic experiences that will thrill, delight and surprise you.<br><br>
+					Whether it's exploring the River Thames by kayak, seeing a live performance of Shakespeare or learning how to make elegant martinis, we have plenty to amaze you with.<br><br>
+					We unearth all these hidden gems and take all the hassle out of finding, organising and booking them yourself. Rest assured you are in safe hands with our travel experts, so you can relax and look forward to your extraordinary adventure.
+				</p>
+			</div>
+			<div class="col-sm-6">
+				<img href="/activities" class="img-responsive" src="https://fbcdn-sphotos-h-a.akamaihd.net/hphotos-ak-prn2/t1.0-9/10154160_859864780697572_1671713725620040302_n.jpg">
+			</div>
+		</div>
 
+		<div class="row">
+			<div class="col-sm-6">
+				<img href="/activities" class="img-responsive" src="https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-prn2/t1.0-9/10330241_859864327364284_6352157547807122965_n.jpg">
+			</div>
+			<div class="col-sm-6">
+				<h1>Exclusively for Chinese Clients</h1>
+				<hr>
+				<p>This service caters especially for Chinese customers.<br><br>
+					Whether you are a student studying in the UK or a young professional, we understand that you want high quality experiences on your trips rather than doing what every other tourist does.<br><br>
+					We offer a bespoke service that allows you to choose exactly what you want to see, do and experience. Receive as much advice as you want from our travel experts who can also provide excellent restaurant, bar and nightlife recomendations just for you.<br><br>
+					Mandarin speaking tour guides are available upon request.
+				</p>
+			</div>
+		</div>
+	</div>
+</template>
 
+<template name="contactUs">
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	  <div class="container">
+	  	<a class="navbar-brand">Eclipse Europe Travel</a>
+	  	<ul class="nav navbar-nav navbar-right">
+	        <li><a href="/">Home</a></li>
+	        <li><a href="/whatwedo">What We Do</a></li>
+	        <li><a href="/activities">London Activities</a></li>
+	        <li class="active"><a href="/contact">Contact Us</a></li>
+	    </ul>
+	  </div>
+	</nav>
 
+	<div class="jumbotron " style="padding-top: 70px;">
+			<div class="container">							
+			  		<h1>Get in touch</h1>
+			  		<h1>enquires@eclipse-europe.com</h1>				
+			</div>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-6">
+				<h3>Contact Us</h3>
+				<hr>
+				<p>Please feel free to contact us about anything regarding trips, amazing experiences, feedback or just to chat!
+				</p>				
+			</div>
+			<div class="col-sm-6">
+				<h3>Jobs</h3>
+				<hr>
+				<p>We always appreciate new talent and interesting people. If you think you have what it takes don't hesitate to get in touch.
+				</p>
+			</div>
+		</div>
+	</div>
+</template>
 

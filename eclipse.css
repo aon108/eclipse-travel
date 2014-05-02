@@ -1,1 +1,32 @@
 /* CSS declarations go here */
+
+.mainImage {
+	background-image:url(http://gregaubs.moonfruit.com/communities/8/004/012/601/158//images/4608771580_1500x448.jpg);
+    background-position:center;
+    background-repeat: no-repeat;
+    
+}
+
+.mainContent {
+	background-color: rgba(0,0,0,0.5);
+	color: white;
+}
+
+.ACImage{
+	background-image:url(https://scontent-b-lhr.xx.fbcdn.net/hphotos-prn2/t1.0-9/984058_859863944030989_5889557142889530377_n.jpg);
+    background-position:center;
+    background-repeat: no-repeat;
+}
+
+.AAImage{
+	background-image:url(https://fbcdn-sphotos-d-a.akamaihd.net/hphotos-ak-ash3/t1.0-9/1017161_859864140697636_5284511890273500940_n.jpg);
+    background-position:center;
+    background-repeat: no-repeat;
+}
+
+.FDImage{
+	background-image:url( https://scontent-a-lhr.xx.fbcdn.net/hphotos-ash3/t1.0-9/10176184_859865494030834_545786740605574574_n.jpg);
+    background-position:center;
+    background-repeat: no-repeat;
+}
+

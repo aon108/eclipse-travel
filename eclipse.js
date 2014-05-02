@@ -5,14 +5,26 @@ Category = new Meteor.Collection("category");
 Router.map(function () {
   this.route('home', {
     path: '/',
+    template: 'homepage',
+    });
+  this.route('whatWeDo', {
+    path: '/whatwedo',
+    template: 'whatWeDo',
+    });
+  this.route('activities', {
+    path: '/activities',
     template: 'appLayout',
+    });
+  this.route('contactUs', {
+    path: '/contact',
+    template: 'contactUs',
     });
   this.route('admin', {
     path: '/admin',
     template: 'admin',
   });
   this.route('addActivity', {
-    path: '/activities',
+    path: '/editActivities',
     template: 'addActivity'
   });
   this.route('booked', {
@@ -22,14 +34,110 @@ Router.map(function () {
 
 
 if (Meteor.isClient) {
-  Session.setDefault("selected_category", "category1");
+  Session.setDefault("selected_category", "Food and Drink");
   Session.setDefault("current_day", 1);
+  Session.setDefault("is_sliding", 0);
 
-  Planet("appLayout") ({
+  Planet("appLayout") ({    
     helpers: {
       activities: function() {
         var category = Session.get("selected_category");
         return Activity.find({category: category});
+      },
+      
+      Categories: function() {
+        var allCategories = Category.findOne({type: "main"}, {fields:{categories:1}});
+        if(allCategories){
+        return allCategories.categories
+        }
+      },
+    },     
+    
+  });
+
+  Template.appLayout.events({
+    'click .catPill': function() {
+        Meteor.setTimeout(function(){
+          var selCat = $('.catPill.active').attr('id');
+          Session.set("selected_category", selCat);
+        }, 50);        
+      },       
+      'click .thumbnail': function() {
+        Session.set("selected_activity", this._id);               
+      },
+      'click .tripAdd': function() {  
+        var userItin = Itinerary.findOne({user: Meteor.userId()}, {fields:{_id:1}});
+        Session.set("selected_activity", this._id);
+        
+          if(!userItin){
+            if(Meteor.userId()){
+            Itinerary.insert({user: Meteor.userId(), activities: [], booked:false, email:""});
+            Session.set("first_login", true);
+            } else {
+            $('#instructionModal').modal('show');
+            }
+          } else {
+            Session.set("itin_id", userItin._id);
+          }
+
+        if(Session.equals("first_login", true)){
+          var userItin = Itinerary.findOne({user: Meteor.userId()}, {fields:{_id:1}});
+          Session.set("itin_id", userItin._id);
+        } 
+        var selActivity = Activity.findOne({_id: Session.get("selected_activity")}, {fields:{title:1, price:1}});
+        Itinerary.update({_id: Session.get("itin_id")}, {$addToSet: {activities: {day: Session.get("current_day"), _id: Random.id(), title: selActivity.title, price: selActivity.price}}});
+        $('#myModal').modal('hide');
+      },
+      'click .removeItin': function() {        
+        var myItin = Itinerary.findOne({user: Meteor.userId()}, {fields:{activities:1, booked:1}});
+
+        if(myItin.booked !== true){
+        for(var i=0;i<myItin.activities.length;i++){
+          if(myItin.activities[i]._id === this._id){
+            break
+          }
+        }
+
+        myItin.activities.splice(i,1);        
+        Itinerary.update(Session.get("itin_id"), {$set: {activities: myItin.activities}});
+      }
+      },
+      'click .previous': function(){
+        currentDay = Session.get("current_day");
+        if( currentDay > 1){
+          Session.set("current_day", (currentDay-1));
+        }
+      },
+      'click .next': function() {
+        Session.set("current_day", (Session.get("current_day")+1));
+      },
+      'click #clearTrip': function() {
+        var myItin = Itinerary.findOne({user: Meteor.userId()}, {fields:{booked:1}});
+        if(!myItin.booked){
+          Itinerary.update(Session.get("itin_id"), {$set: {activities: []}});
+          Session.set("current_day",1);
+        }
+
+      },
+      'click #bookItin': function() {
+        var myEmail = Meteor.users.findOne(Meteor.userId(), {fields:{emails:1}});
+        var tripTotal = Session.get("trip_total");
+        Itinerary.update(Session.get("itin_id"), {$set: {booked: true, email: myEmail.emails[0].address, total: tripTotal}});
+        Router.go('booked');
+      },
+  });
+
+  Planet("itinPlanner")({
+    rendered: function(){
+      $('#instructionModal').modal('hide');
+    },
+    helpers: {
+      loggedIn: function() {
+        if(Meteor.userId()){
+          return 'info'
+        } else {
+          return 'danger'
+        }
       },
       itinItems: function() {
           var thisDay = Session.get("current_day");
@@ -57,90 +165,9 @@ if (Meteor.isClient) {
         }
         Session.set("trip_total", total);
         return total
-
       },
-      Categories: function() {
-        var allCategories = Category.findOne({type: "main"}, {fields:{categories:1}});
-        if(allCategories){
-        return allCategories.categories
-        }
-      },
-
     }
   });
-
-  Template.appLayout.events({
-    'click .catPill': function() {
-        Meteor.setTimeout(function(){
-          var selCat = $('.catPill.active').attr('id');
-          Session.set("selected_category", selCat);
-        }, 50);        
-      },       
-      'click .thumbnail': function() {
-        Session.set("selected_activity", this._id);
-      },
-      'click .tripAdd': function() {  
-        var userItin = Itinerary.findOne({user: Meteor.userId()}, {fields:{_id:1}});
-        Session.set("selected_activity", this._id);
-        
-          if(!userItin){
-            if(Meteor.userId()){
-            Itinerary.insert({user: Meteor.userId(), activities: [], booked:false, email:""});
-            Session.set("first_login", true);
-            } else {
-              alert("you have to log in before planning trip");
-            }
-          } else {
-            Session.set("itin_id", userItin._id);
-          }
-
-        if(Session.equals("first_login", true)){
-          var userItin = Itinerary.findOne({user: Meteor.userId()}, {fields:{_id:1}});
-          Session.set("itin_id", userItin._id);
-        } 
-        var selActivity = Activity.findOne({_id: Session.get("selected_activity")}, {fields:{title:1, price:1}});
-        Itinerary.update({_id: Session.get("itin_id")}, {$addToSet: {activities: {day: Session.get("current_day"), _id: Random.id(), title: selActivity.title, price: selActivity.price}}});
-        $('#myModal').modal('hide');
-      },
-      'click .removeItin': function() {        
-        var myItin = Itinerary.findOne({user: Meteor.userId()}, {fields:{activities:1}});
-
-        for(var i=0;i<myItin.activities.length;i++){
-          if(myItin.activities[i]._id === this._id){
-            break
-          }
-        }
-
-        myItin.activities.splice(i,1);        
-        Itinerary.update(Session.get("itin_id"), {$set: {activities: myItin.activities}});
-      },
-      'click .previous': function(){
-        currentDay = Session.get("current_day");
-        if( currentDay > 1){
-          Session.set("current_day", (currentDay-1));
-        }
-      },
-      'click .next': function() {
-        Session.set("current_day", (Session.get("current_day")+1));
-      },
-      'click #clearTrip': function() {
-        var myItin = Itinerary.findOne({user: Meteor.userId()}, {fields:{booked:1}});
-        if(!myItin.booked){
-          Itinerary.update(Session.get("itin_id"), {$set: {activities: []}});
-          Session.set("current_day",1);
-        }
-
-      },
-      'click #bookItin': function() {
-        var myEmail = Meteor.users.findOne(Meteor.userId(), {fields:{emails:1}});
-        var tripTotal = Session.get("trip_total");
-        Itinerary.update(Session.get("itin_id"), {$set: {booked: true, email: myEmail.emails[0].address, total: tripTotal}});
-        Router.go('booked');
-      },
-      'click #bookedTrips': function() {
-        Router.go('admin');
-      },
-  })
 
   Planet("admin") ({
     helpers: {
@@ -159,7 +186,7 @@ if (Meteor.isClient) {
 
   Template.admin.events({
     'click #booking': function() {
-        Router.go('home');
+        Router.go('activities');
       },
       'click .panel': function() {
         Session.set("selected_btrips", this._id);
@@ -200,6 +227,7 @@ if (Meteor.isClient) {
         description: $('#inputShortDesc').val(),
         details: $('#inputLongDesc').val(),
         images: $('#inputImageURL').val(),
+        otherImgs: $('#inputOtherImages').val().split(","),
       }
 
       if(Session.equals("edit_activity",0)){
@@ -230,12 +258,34 @@ if (Meteor.isClient) {
     }
   });
 
+  Template.Modal.events({
+    'click .close': function() {
+      $('#myModal').modal('hide');
+      $('#myModal').on('hidden.bs.modal', function (e) {
+        $('#myCarousel').carousel(0);  
+      })
+    }
+  });   
+
+  Planet("modalCarousel") ({
+    helpers: {
+      CarouselImages: function() {
+        var getImgs = Activity.findOne(Session.get("selected_activity"), {fields:{images:1, otherImgs: 1}});
+        if(getImgs){
+          return getImgs
+        }
+      }
+    }
+  });
+
+  
+
 }
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
     Itinerary.remove({booked: false});
-    
+
     if (Category.find().count() === 0){
       Category.insert({type: "main", categories: []});
       var currentActivities = Activity.find().fetch();
